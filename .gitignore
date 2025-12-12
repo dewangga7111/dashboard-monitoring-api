@@ -1,0 +1,12 @@
+node_modules
+/*.env
+/*.log
+/public/images
+public
+logs
+report
+*.lock
+*-lock.json
+.vscode/* 
+
+tester_js.js
