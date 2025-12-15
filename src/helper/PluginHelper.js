@@ -17,14 +17,6 @@ class PluginHelper {
                 sub_category: 'PLUGIN_PATHS'
             });
 
-            if (!configs || configs.length === 0) {
-                // Default paths if not configured
-                return [
-                    '/var/lib/grafana/plugins',
-                    '/var/lib/perses/plugins'
-                ];
-            }
-
             return configs.map(c => c.value);
         } catch (err) {
             this.#logger.error('getPluginPaths', err);

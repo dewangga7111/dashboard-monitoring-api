@@ -7,7 +7,7 @@ const Controller = require('../../controller/SystemController');
 const Schema = require('../../schema/SystemSchema')
 const router = Router()
 
-const FUNCTION_ID = Constant.FUNCTION_ID_SYSTEM_MASTER
+const FUNCTION_ID = Constant.FUNCTION_ID_SYSTEM
 
 router.all('/*', JwtFilter)
 
