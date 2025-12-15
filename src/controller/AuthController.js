@@ -16,7 +16,7 @@ class AuthController {
         let param = req.body;
         try {            
             const userObj = await User.findByUserId(param.user_id, true)
-
+            
             if(!userObj) {
                 return ResponseUtil.Unauthorized(res, MessageUtil.GetMsg('invalid.login')) 
             }

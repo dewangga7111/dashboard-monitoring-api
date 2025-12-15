@@ -9,7 +9,6 @@ const httpServer = http.createServer(app);
 const port = process.env.SERVER_PORT;
 httpServer.listen(port, () => {
     console.log(`Server started, listening on port ${port}!`);
-
 });
 
 const io = new SocketIO.Server(httpServer, {

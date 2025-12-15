@@ -7,7 +7,7 @@ const Controller = require('../../controller/PermissionController');
 const Schema = require('../../schema/PermissionSchema')
 const router = Router()
 
-const FUNCTION_ID = Constant.FUNCTION_ID_ROLE_PERMISSION
+const FUNCTION_ID = Constant.FUNCTION_ID_PERMISSION
 
 router.all('/*', JwtFilter)
 

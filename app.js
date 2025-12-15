@@ -13,7 +13,7 @@ app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ extended: true })); 
 
 // register base path '/'
-app.get('/', (req, res) => res.send(`BE Up`))
+app.get('/', (req, res) => res.send(`BE Dashboard Monitoring Up`))
 
 // to public access attachment
 app.use('/file/public',  express.static('public'));

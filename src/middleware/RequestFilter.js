@@ -93,8 +93,10 @@ const PermissionFilter = (function_id, action) => {
     const { role_id } = req.user    
     console.log('role_id', role_id)
     let permissions = await Permission.getBy({ role_id })
+    console.log('id', function_id)
 
     let access = permissions.filter(f => f.function_id == function_id && f[action.toLowerCase()] == 'Y')
+    console.log('access', access)
     if(access && access.length > 0) {
       next()
     } else {

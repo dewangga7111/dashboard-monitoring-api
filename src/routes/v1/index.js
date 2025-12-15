@@ -6,5 +6,6 @@ routes.use('/user', require('./UserRouter'))
 routes.use('/system', require('./SystemRouter'))
 routes.use('/combo', require('./ComboRouter'))
 routes.use('/permission', require('./PermissionRouter'))
+routes.use('/prometheus', require('./PrometheusRouter'))
 
 module.exports = routes;
