@@ -21,10 +21,7 @@ class PluginHelper {
         } catch (err) {
             this.#logger.error('getPluginPaths', err);
             // Return default paths on error
-            return [
-                '/var/lib/grafana/plugins',
-                '/var/lib/perses/plugins'
-            ];
+            return null
         }
     }
 

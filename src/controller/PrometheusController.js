@@ -284,6 +284,30 @@ class PrometheusController {
             return ResponseUtil.InternalServerErr(res, `Failed to get values for label '${label}': ` + err.message);
         }
     }
+
+    /**
+     * Get metric metadata (TYPE, HELP descriptions)
+     */
+    metadata = async (req, res) => {
+        const { metric, limit } = req.query;
+
+        try {
+            const metadataInfo = await PrometheusHelper.getMetadata(
+                metric,
+                limit ? parseInt(limit) : null
+            );
+
+            const result = {
+                count: Object.keys(metadataInfo).length,
+                metadata: metadataInfo
+            };
+
+            return ResponseUtil.Ok(res, 'Metadata retrieved successfully', result);
+        } catch (err) {
+            this.#logger.error('metadata', err);
+            return ResponseUtil.InternalServerErr(res, 'Failed to get metadata: ' + err.message);
+        }
+    }
 }
 
 module.exports = new PrometheusController();

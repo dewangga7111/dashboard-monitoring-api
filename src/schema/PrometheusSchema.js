@@ -18,8 +18,14 @@ const pluginPathParamsSchema = Joi.object().keys({
     plugin_path: Joi.string().optional()
 })
 
+const metadataParamsSchema = Joi.object().keys({
+    metric: Joi.string().optional(),
+    limit: Joi.number().optional()
+})
+
 module.exports = {
     queryParamsSchema,
     queryRangeParamsSchema,
-    pluginPathParamsSchema
+    pluginPathParamsSchema,
+    metadataParamsSchema
 }

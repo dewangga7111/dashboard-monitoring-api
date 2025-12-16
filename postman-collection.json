@@ -1,0 +1,1853 @@
+{
+	"info": {
+		"_postman_id": "abc12345-def6-7890-ghij-klmnopqrstuv",
+		"name": "Dashboard Monitoring API - Complete",
+		"description": "Complete API collection including Prometheus monitoring and Dashboard management",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"variable": [
+		{
+			"key": "base_url",
+			"value": "http://localhost:3000",
+			"type": "string"
+		},
+		{
+			"key": "token",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "user_id",
+			"value": "demo",
+			"type": "string"
+		},
+		{
+			"key": "activity_id",
+			"value": "",
+			"type": "string"
+		}
+	],
+	"item": [
+		{
+			"name": "Health Check",
+			"item": [
+				{
+					"name": "Check Server Status",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								""
+							]
+						},
+						"description": "Simple health check to verify server is running"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Authentication",
+			"item": [
+				{
+					"name": "Login",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 200) {",
+									"    var jsonData = pm.response.json();",
+									"    pm.environment.set('token', jsonData.data.token);",
+									"    pm.environment.set('activity_id', jsonData.data.activity_id);",
+									"    pm.environment.set('user_id', jsonData.data.user_id);",
+									"    console.log('Token saved to environment:', jsonData.data.token);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"user_id\": \"demo\",\n    \"password\": \"Abcd3fg!\",\n    \"remember_me\": false,\n    \"recaptcha_token\": \"\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/auth/login",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"auth",
+								"login"
+							]
+						},
+						"description": "User login - automatically saves token to environment"
+					},
+					"response": []
+				},
+				{
+					"name": "Check Token",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/v1/auth/check-token",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"auth",
+								"check-token"
+							]
+						},
+						"description": "Verify if token is still valid"
+					},
+					"response": []
+				},
+				{
+					"name": "Forgot Password",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\": \"user@example.com\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/auth/forgot-password",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"auth",
+								"forgot-password"
+							]
+						},
+						"description": "Request OTP for password reset"
+					},
+					"response": []
+				},
+				{
+					"name": "Verify OTP",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\": \"user@example.com\",\n    \"otp\": \"1234\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/auth/verify-otp",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"auth",
+								"verify-otp"
+							]
+						},
+						"description": "Verify OTP code"
+					},
+					"response": []
+				},
+				{
+					"name": "Reset Password",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\": \"user@example.com\",\n    \"new_password\": \"NewPass123!\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/auth/reset-password",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"auth",
+								"reset-password"
+							]
+						},
+						"description": "Reset password with new password"
+					},
+					"response": []
+				},
+				{
+					"name": "Logout",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"activity_id\": \"{{activity_id}}\",\n    \"user_id\": \"{{user_id}}\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/auth/logout",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"auth",
+								"logout"
+							]
+						},
+						"description": "User logout"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "User Management",
+			"item": [
+				{
+					"name": "Search Users",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/v1/user?page=1&per_page=10",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"user"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "1"
+								},
+								{
+									"key": "per_page",
+									"value": "10"
+								},
+								{
+									"key": "user_id",
+									"value": "",
+									"disabled": true
+								},
+								{
+									"key": "name",
+									"value": "",
+									"disabled": true
+								},
+								{
+									"key": "email",
+									"value": "",
+									"disabled": true
+								},
+								{
+									"key": "role_id",
+									"value": "",
+									"disabled": true
+								},
+								{
+									"key": "status",
+									"value": "",
+									"disabled": true
+								}
+							]
+						},
+						"description": "Search and paginate users with filters"
+					},
+					"response": []
+				},
+				{
+					"name": "Get User Detail",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/v1/user/detail?user_id=demo",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"user",
+								"detail"
+							],
+							"query": [
+								{
+									"key": "user_id",
+									"value": "demo"
+								}
+							]
+						},
+						"description": "Get detailed information for specific user"
+					},
+					"response": []
+				},
+				{
+					"name": "Create User",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"user_id\": \"newuser\",\n    \"name\": \"New User\",\n    \"email\": \"newuser@example.com\",\n    \"password\": \"Pass123!\",\n    \"role_id\": \"admin\",\n    \"status\": \"01\",\n    \"phone\": \"081234567890\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/user",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"user"
+							]
+						},
+						"description": "Create new user"
+					},
+					"response": []
+				},
+				{
+					"name": "Update User",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"user_id\": \"demo\",\n    \"name\": \"Updated Name\",\n    \"email\": \"updated@example.com\",\n    \"phone\": \"081234567890\",\n    \"role_id\": \"admin\",\n    \"status\": \"01\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/user",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"user"
+							]
+						},
+						"description": "Update existing user"
+					},
+					"response": []
+				},
+				{
+					"name": "Delete User",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/v1/user?user_id=testuser",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"user"
+							],
+							"query": [
+								{
+									"key": "user_id",
+									"value": "testuser"
+								}
+							]
+						},
+						"description": "Delete single user"
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Many Users",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "[\n    {\"user_id\": \"user1\"},\n    {\"user_id\": \"user2\"}\n]"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/user/delete-many",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"user",
+								"delete-many"
+							]
+						},
+						"description": "Delete multiple users"
+					},
+					"response": []
+				},
+				{
+					"name": "Change Password",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"user_id\": \"demo\",\n    \"old_password\": \"OldPass123!\",\n    \"new_password\": \"NewPass123!\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/user/change-password",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"user",
+								"change-password"
+							]
+						},
+						"description": "Change user password (requires old password)"
+					},
+					"response": []
+				},
+				{
+					"name": "Reset Password (Admin)",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"user_id\": \"demo\",\n    \"new_password\": \"ResetPass123!\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/user/reset-password",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"user",
+								"reset-password"
+							]
+						},
+						"description": "Admin reset user password (no old password needed)"
+					},
+					"response": []
+				},
+				{
+					"name": "Register User (Public)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"user_id\": \"newuser\",\n    \"name\": \"New User\",\n    \"email\": \"newuser@example.com\",\n    \"phone\": \"081234567890\",\n    \"password\": \"Pass123!\",\n    \"recaptcha_token\": \"\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/user/register",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"user",
+								"register"
+							]
+						},
+						"description": "Public user registration (no auth required)"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "System Master",
+			"item": [
+				{
+					"name": "Search System Config",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/v1/system?page=1&per_page=10",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"system"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "1"
+								},
+								{
+									"key": "per_page",
+									"value": "10"
+								},
+								{
+									"key": "category",
+									"value": "",
+									"disabled": true
+								},
+								{
+									"key": "sub_category",
+									"value": "",
+									"disabled": true
+								},
+								{
+									"key": "code",
+									"value": "",
+									"disabled": true
+								},
+								{
+									"key": "value",
+									"value": "",
+									"disabled": true
+								}
+							]
+						},
+						"description": "Search system configuration (tb_m_system)"
+					},
+					"response": []
+				},
+				{
+					"name": "Create System Config",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"category\": \"MONITORING\",\n    \"sub_category\": \"PROMETHEUS\",\n    \"code\": \"url\",\n    \"value\": \"http://localhost:9090\",\n    \"remark\": \"Prometheus server URL\",\n    \"sequence\": 1\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/system",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"system"
+							]
+						},
+						"description": "Create new system configuration"
+					},
+					"response": []
+				},
+				{
+					"name": "Update System Config",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"category\": \"MONITORING\",\n    \"sub_category\": \"PROMETHEUS\",\n    \"code\": \"url\",\n    \"value\": \"http://localhost:9090\",\n    \"remark\": \"Updated Prometheus URL\",\n    \"sequence\": 1\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/system",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"system"
+							]
+						},
+						"description": "Update existing system configuration"
+					},
+					"response": []
+				},
+				{
+					"name": "Delete System Config",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"category\": \"MONITORING\",\n    \"sub_category\": \"PROMETHEUS\",\n    \"code\": \"url\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/system",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"system"
+							]
+						},
+						"description": "Delete system configuration"
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Many System Config",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "[\n    {\n        \"category\": \"MONITORING\",\n        \"sub_category\": \"PROMETHEUS\",\n        \"code\": \"url\"\n    },\n    {\n        \"category\": \"MONITORING\",\n        \"sub_category\": \"PROMETHEUS\",\n        \"code\": \"timeout\"\n    }\n]"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/system/delete-many",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"system",
+								"delete-many"
+							]
+						},
+						"description": "Delete multiple system configurations"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Permission Management",
+			"item": [
+				{
+					"name": "Get Role List",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/v1/permission/role-list?page=1&per_page=10",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"permission",
+								"role-list"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "1"
+								},
+								{
+									"key": "per_page",
+									"value": "10"
+								}
+							]
+						},
+						"description": "Get paginated list of roles"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Permission Detail",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/v1/permission/detail?role_id=admin",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"permission",
+								"detail"
+							],
+							"query": [
+								{
+									"key": "role_id",
+									"value": "admin"
+								}
+							]
+						},
+						"description": "Get detailed permissions for specific role"
+					},
+					"response": []
+				},
+				{
+					"name": "Save Permissions",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"role_id\": \"admin\",\n    \"permissions\": [\n        {\n            \"function_id\": \"F501\",\n            \"create\": \"Y\",\n            \"read\": \"Y\",\n            \"update\": \"Y\",\n            \"delete\": \"Y\",\n            \"approve\": \"N\"\n        },\n        {\n            \"function_id\": \"F601\",\n            \"create\": \"Y\",\n            \"read\": \"Y\",\n            \"update\": \"Y\",\n            \"delete\": \"Y\",\n            \"approve\": \"N\"\n        }\n    ]\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/permission/save",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"permission",
+								"save"
+							]
+						},
+						"description": "Save or update role permissions"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Combo/Dropdown",
+			"item": [
+				{
+					"name": "Get User Roles",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/v1/combo/user-role",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"combo",
+								"user-role"
+							]
+						},
+						"description": "Get list of user roles for dropdown"
+					},
+					"response": []
+				},
+				{
+					"name": "Get User Status",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/v1/combo/user-status",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"combo",
+								"user-status"
+							]
+						},
+						"description": "Get list of user statuses for dropdown"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Function Menu",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/v1/combo/function-menu",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"combo",
+								"function-menu"
+							]
+						},
+						"description": "Get list of function/menu items for dropdown"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Prometheus Monitoring",
+			"item": [
+				{
+					"name": "Get Prometheus Status",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/v1/prometheus/status",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"prometheus",
+								"status"
+							]
+						},
+						"description": "Get Prometheus server status (health, ready, version)"
+					},
+					"response": []
+				},
+				{
+					"name": "Health Check (Complete)",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/v1/prometheus/health",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"prometheus",
+								"health"
+							]
+						},
+						"description": "Complete health check including Prometheus status and installed plugins"
+					},
+					"response": []
+				},
+				{
+					"name": "Get All Targets",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/v1/prometheus/targets",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"prometheus",
+								"targets"
+							]
+						},
+						"description": "Get all Prometheus scrape targets with health status"
+					},
+					"response": []
+				},
+				{
+					"name": "Query - Check Targets Up",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/v1/prometheus/query?query=up",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"prometheus",
+								"query"
+							],
+							"query": [
+								{
+									"key": "query",
+									"value": "up",
+									"description": "Check if targets are up (1=up, 0=down)"
+								},
+								{
+									"key": "time",
+									"value": "",
+									"disabled": true,
+									"description": "Optional: Unix timestamp for specific time"
+								},
+								{
+									"key": "timeout",
+									"value": "",
+									"disabled": true,
+									"description": "Optional: Query timeout"
+								}
+							]
+						},
+						"description": "Query if targets are up (1=up, 0=down)"
+					},
+					"response": []
+				},
+				{
+					"name": "Query - CPU Usage",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/v1/prometheus/query?query=100-(avg(rate(node_cpu_seconds_total{mode=\"idle\"}[5m]))*100)",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"prometheus",
+								"query"
+							],
+							"query": [
+								{
+									"key": "query",
+									"value": "100-(avg(rate(node_cpu_seconds_total{mode=\"idle\"}[5m]))*100)",
+									"description": "Average CPU usage percentage"
+								}
+							]
+						},
+						"description": "Query average CPU usage percentage"
+					},
+					"response": []
+				},
+				{
+					"name": "Query - Memory Available",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/v1/prometheus/query?query=node_memory_MemAvailable_bytes",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"prometheus",
+								"query"
+							],
+							"query": [
+								{
+									"key": "query",
+									"value": "node_memory_MemAvailable_bytes",
+									"description": "Available memory in bytes"
+								}
+							]
+						},
+						"description": "Query available memory in bytes"
+					},
+					"response": []
+				},
+				{
+					"name": "Query - Syntax Error (Test)",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/v1/prometheus/query?query=100 - (avg by (instance) (irate(node_cpu_seconds_total{mode=\"idle\"}[5m])) * 100",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"prometheus",
+								"query"
+							],
+							"query": [
+								{
+									"key": "query",
+									"value": "100 - (avg by (instance) (irate(node_cpu_seconds_total{mode=\"idle\"}[5m])) * 100",
+									"description": "Example query with syntax error to test error handling"
+								}
+							]
+						},
+						"description": "Test query with syntax error - should return Prometheus error message"
+					},
+					"response": []
+				},
+				{
+					"name": "Query - Invalid Metric (Test)",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/v1/prometheus/query?query=nonexistent_metric_name_12345",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"prometheus",
+								"query"
+							],
+							"query": [
+								{
+									"key": "query",
+									"value": "nonexistent_metric_name_12345",
+									"description": "Non-existent metric - returns empty result (not error)"
+								}
+							]
+						},
+						"description": "Test query with non-existent metric - returns empty result set"
+					},
+					"response": []
+				},
+				{
+					"name": "Query Range - CPU Over Time",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/v1/prometheus/query-range?query=100-(avg(rate(node_cpu_seconds_total{mode=\"idle\"}[5m]))*100)&start=1702380000&end=1702386000&step=1m",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"prometheus",
+								"query-range"
+							],
+							"query": [
+								{
+									"key": "query",
+									"value": "100-(avg(rate(node_cpu_seconds_total{mode=\"idle\"}[5m]))*100)",
+									"description": "CPU usage query"
+								},
+								{
+									"key": "start",
+									"value": "1702380000",
+									"description": "Unix timestamp - start time"
+								},
+								{
+									"key": "end",
+									"value": "1702386000",
+									"description": "Unix timestamp - end time"
+								},
+								{
+									"key": "step",
+									"value": "1m",
+									"description": "Query resolution (1m, 5m, 15s, etc)"
+								},
+								{
+									"key": "timeout",
+									"value": "",
+									"disabled": true,
+									"description": "Optional: Query timeout"
+								}
+							]
+						},
+						"description": "Query CPU usage over time range (for graphs)"
+					},
+					"response": []
+				},
+				{
+					"name": "Query Range - Memory Over Time",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/v1/prometheus/query-range?query=node_memory_MemAvailable_bytes&start=1702380000&end=1702386000&step=5m",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"prometheus",
+								"query-range"
+							],
+							"query": [
+								{
+									"key": "query",
+									"value": "node_memory_MemAvailable_bytes",
+									"description": "Memory available query"
+								},
+								{
+									"key": "start",
+									"value": "1702380000",
+									"description": "Unix timestamp - start time"
+								},
+								{
+									"key": "end",
+									"value": "1702386000",
+									"description": "Unix timestamp - end time"
+								},
+								{
+									"key": "step",
+									"value": "5m",
+									"description": "Query resolution"
+								}
+							]
+						},
+						"description": "Query memory available over time (for graphs)"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Prometheus Config",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/v1/prometheus/config",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"prometheus",
+								"config"
+							]
+						},
+						"description": "Get Prometheus configuration (prometheus.yml)"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Installed Plugins",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/v1/prometheus/plugins",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"prometheus",
+								"plugins"
+							]
+						},
+						"description": "Get all installed plugins from Grafana/Perses"
+					},
+					"response": []
+				},
+				{
+					"name": "Get All Label Names",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/v1/prometheus/labels",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"prometheus",
+								"labels"
+							]
+						},
+						"description": "Get all available label names from Prometheus (for query builder autocomplete)"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Label Values - Metric Names",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/v1/prometheus/label/__name__/values",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"prometheus",
+								"label",
+								"__name__",
+								"values"
+							]
+						},
+						"description": "Get all available metric names (for autocomplete when building queries)"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Label Values - Job Names",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/v1/prometheus/label/job/values",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"prometheus",
+								"label",
+								"job",
+								"values"
+							]
+						},
+						"description": "Get all job names (for filtering by job in queries)"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Label Values - Instance Names",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/v1/prometheus/label/instance/values",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"prometheus",
+								"label",
+								"instance",
+								"values"
+							]
+						},
+						"description": "Get all instance names (for filtering by instance in queries)"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Series Metadata",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/v1/prometheus/series?match[]=up",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"prometheus",
+								"series"
+							],
+							"query": [
+								{
+									"key": "match[]",
+									"value": "up",
+									"description": "Label selector (can add multiple)"
+								},
+								{
+									"key": "start",
+									"value": "",
+									"disabled": true,
+									"description": "Optional: Unix timestamp start"
+								},
+								{
+									"key": "end",
+									"value": "",
+									"disabled": true,
+									"description": "Optional: Unix timestamp end"
+								}
+							]
+						},
+						"description": "Get series metadata matching label selectors"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Label Values Filtered",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/v1/prometheus/label/instance/values-filtered?match[]=up{job=\"prometheus\"}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"prometheus",
+								"label",
+								"instance",
+								"values-filtered"
+							],
+							"query": [
+								{
+									"key": "match[]",
+									"value": "up{job=\"prometheus\"}",
+									"description": "Filter label values by selector"
+								}
+							]
+						},
+						"description": "Get label values with optional filtering by selector"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Metric Metadata",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/v1/prometheus/metadata?metric=up",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"prometheus",
+								"metadata"
+							],
+							"query": [
+								{
+									"key": "metric",
+									"value": "up",
+									"description": "Optional: specific metric name"
+								},
+								{
+									"key": "limit",
+									"value": "",
+									"disabled": true,
+									"description": "Optional: limit results"
+								}
+							]
+						},
+						"description": "Get metric metadata (TYPE, HELP descriptions)"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Dashboard",
+			"item": [
+				{
+					"name": "Search Dashboards",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/v1/dashboard?page=1&per_page=10",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"dashboard"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "1"
+								},
+								{
+									"key": "per_page",
+									"value": "10"
+								},
+								{
+									"key": "dashboard_id",
+									"value": "",
+									"disabled": true
+								},
+								{
+									"key": "name",
+									"value": "",
+									"disabled": true
+								},
+								{
+									"key": "created_by",
+									"value": "",
+									"disabled": true
+								}
+							]
+						},
+						"description": "Search and paginate dashboards with filters"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Dashboard Detail",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/v1/dashboard/detail?dashboard_id=dash_001",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"dashboard",
+								"detail"
+							],
+							"query": [
+								{
+									"key": "dashboard_id",
+									"value": "dash_001"
+								}
+							]
+						},
+						"description": "Get detailed information for specific dashboard"
+					},
+					"response": []
+				},
+				{
+					"name": "Create Dashboard",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"dashboard_id\": \"dash_cpu_monitoring\",\n    \"name\": \"CPU Monitoring Dashboard\",\n    \"json\": \"{\\\"queries\\\":[{\\\"expression\\\":\\\"100 - (avg by (instance) (irate(node_cpu_seconds_total{mode=\\\\\\\"idle\\\\\\\"}[5m])) * 100)\\\",\\\"legend\\\":\\\"CPU Usage %\\\"}],\\\"timeRange\\\":{\\\"start\\\":\\\"-1h\\\",\\\"end\\\":\\\"now\\\"}}\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/dashboard",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"dashboard"
+							]
+						},
+						"description": "Create new dashboard with queries"
+					},
+					"response": []
+				},
+				{
+					"name": "Update Dashboard",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"dashboard_id\": \"dash_cpu_monitoring\",\n    \"name\": \"CPU & Memory Monitoring\",\n    \"json\": \"{\\\"queries\\\":[{\\\"expression\\\":\\\"100 - (avg by (instance) (irate(node_cpu_seconds_total{mode=\\\\\\\"idle\\\\\\\"}[5m])) * 100)\\\",\\\"legend\\\":\\\"CPU Usage %\\\"},{\\\"expression\\\":\\\"node_memory_MemAvailable_bytes\\\",\\\"legend\\\":\\\"Memory Available\\\"}],\\\"timeRange\\\":{\\\"start\\\":\\\"-1h\\\",\\\"end\\\":\\\"now\\\"}}\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/dashboard",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"dashboard"
+							]
+						},
+						"description": "Update existing dashboard"
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Dashboard",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/v1/dashboard?dashboard_id=dash_cpu_monitoring",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"dashboard"
+							],
+							"query": [
+								{
+									"key": "dashboard_id",
+									"value": "dash_cpu_monitoring"
+								}
+							]
+						},
+						"description": "Delete single dashboard"
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Many Dashboards",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "[\n    {\"dashboard_id\": \"dash_001\"},\n    {\"dashboard_id\": \"dash_002\"}\n]"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/dashboard/delete-many",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"dashboard",
+								"delete-many"
+							]
+						},
+						"description": "Delete multiple dashboards"
+					},
+					"response": []
+				}
+			]
+		}
+	],
+	"auth": {
+		"type": "bearer",
+		"bearer": [
+			{
+				"key": "token",
+				"value": "{{token}}",
+				"type": "string"
+			}
+		]
+	},
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	]
+}

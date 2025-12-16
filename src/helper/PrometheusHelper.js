@@ -52,7 +52,7 @@ class PrometheusHelper {
         try {
             const baseUrl = await this.getPrometheusUrl();
             const timeout = await this.getPrometheusTimeout();
-            
+
             const response = await axios.get(`${baseUrl}/-/ready`, {
                 timeout,
                 validateStatus: function (status) {
@@ -81,7 +81,7 @@ class PrometheusHelper {
         try {
             const baseUrl = await this.getPrometheusUrl();
             const timeout = await this.getPrometheusTimeout();
-            
+
             const response = await axios.get(`${baseUrl}/-/healthy`, {
                 timeout,
                 validateStatus: function (status) {
@@ -110,7 +110,7 @@ class PrometheusHelper {
         try {
             const baseUrl = await this.getPrometheusUrl();
             const timeout = await this.getPrometheusTimeout();
-            
+
             const response = await axios.get(`${baseUrl}/api/v1/status/buildinfo`, {
                 timeout
             });
@@ -118,7 +118,7 @@ class PrometheusHelper {
             if (response.data && response.data.status === 'success') {
                 return response.data.data;
             }
-            
+
             return null;
         } catch (err) {
             this.#logger.error('getBuildInfo', err);
@@ -133,7 +133,7 @@ class PrometheusHelper {
         try {
             const baseUrl = await this.getPrometheusUrl();
             const timeout = await this.getPrometheusTimeout();
-            
+
             const response = await axios.get(`${baseUrl}/api/v1/targets`, {
                 timeout
             });
@@ -141,7 +141,7 @@ class PrometheusHelper {
             if (response.data && response.data.status === 'success') {
                 return response.data.data;
             }
-            
+
             throw new Error('Failed to fetch targets from Prometheus');
         } catch (err) {
             this.#logger.error('getTargets', err);
@@ -156,7 +156,7 @@ class PrometheusHelper {
         try {
             const baseUrl = await this.getPrometheusUrl();
             const defaultTimeout = await this.getPrometheusTimeout();
-            
+
             const params = { query: queryString };
             if (time) params.time = time;
             if (timeout) params.timeout = timeout;
@@ -187,7 +187,7 @@ class PrometheusHelper {
                     warnings: response.data.warnings || []
                 };
             }
-            
+
             throw new Error('Unexpected response from Prometheus');
         } catch (err) {
             this.#logger.error('query', err);
@@ -207,7 +207,7 @@ class PrometheusHelper {
         try {
             const baseUrl = await this.getPrometheusUrl();
             const defaultTimeout = await this.getPrometheusTimeout();
-            
+
             const params = {
                 query: queryString,
                 start,
@@ -242,7 +242,7 @@ class PrometheusHelper {
                     warnings: response.data.warnings || []
                 };
             }
-            
+
             throw new Error('Unexpected response from Prometheus');
         } catch (err) {
             this.#logger.error('queryRange', err);
@@ -262,7 +262,7 @@ class PrometheusHelper {
         try {
             const baseUrl = await this.getPrometheusUrl();
             const timeout = await this.getPrometheusTimeout();
-            
+
             const response = await axios.get(`${baseUrl}/api/v1/status/config`, {
                 timeout
             });
@@ -270,7 +270,7 @@ class PrometheusHelper {
             if (response.data && response.data.status === 'success') {
                 return response.data.data;
             }
-            
+
             return null;
         } catch (err) {
             this.#logger.error('getConfig', err);
@@ -285,7 +285,7 @@ class PrometheusHelper {
         try {
             const baseUrl = await this.getPrometheusUrl();
             const timeout = await this.getPrometheusTimeout();
-            
+
             const response = await axios.get(`${baseUrl}/api/v1/labels`, {
                 timeout
             });
@@ -293,7 +293,7 @@ class PrometheusHelper {
             if (response.data && response.data.status === 'success') {
                 return response.data.data;
             }
-            
+
             throw new Error('Failed to fetch label names');
         } catch (err) {
             this.#logger.error('getLabelNames', err);
@@ -311,7 +311,7 @@ class PrometheusHelper {
         try {
             const baseUrl = await this.getPrometheusUrl();
             const timeout = await this.getPrometheusTimeout();
-            
+
             const response = await axios.get(`${baseUrl}/api/v1/label/${labelName}/values`, {
                 timeout
             });
@@ -319,10 +319,40 @@ class PrometheusHelper {
             if (response.data && response.data.status === 'success') {
                 return response.data.data;
             }
-            
+
             throw new Error(`Failed to fetch values for label: ${labelName}`);
         } catch (err) {
             this.#logger.error('getLabelValues', err);
+            throw err;
+        }
+    }
+
+    /**
+     * Get metadata about metrics (TYPE, HELP)
+     * 
+     * @param {string} metric - Optional metric name to filter
+     */
+    async getMetadata(metric = null, limit = null) {
+        try {
+            const baseUrl = await this.getPrometheusUrl();
+            const timeout = await this.getPrometheusTimeout();
+
+            const params = {};
+            if (metric) params.metric = metric;
+            if (limit) params.limit = limit;
+
+            const response = await axios.get(`${baseUrl}/api/v1/metadata`, {
+                params,
+                timeout
+            });
+
+            if (response.data && response.data.status === 'success') {
+                return response.data.data;
+            }
+
+            throw new Error('Failed to fetch metadata');
+        } catch (err) {
+            this.#logger.error('getMetadata', err);
             throw err;
         }
     }

@@ -30,4 +30,7 @@ router.get('/plugins', Controller.plugins);
 router.get('/labels', Controller.labelNames);
 router.get('/label/:label/values', Controller.labelValues);
 
+// Metadata exploration
+router.get('/metadata', celebrate({ query: Schema.metadataParamsSchema }), Controller.metadata);
+
 module.exports = router;
