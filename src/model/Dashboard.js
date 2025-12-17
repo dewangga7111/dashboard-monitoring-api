@@ -69,10 +69,11 @@ const create = async (param, by) => {
         + " INSERT INTO tb_r_dashboard "
         + " (dashboard_id, name, json, created_dt, created_by, updated_dt, updated_by) "
         + " VALUES "
-        + " (${dashboard_id}, ${name}, ${json}, ${created_dt}, ${created_by}, ${updated_dt}, ${updated_by}) ";
+        + " (${dashboard_id}, ${name}, ${json}, ${created_dt}, ${created_by}, ${updated_dt}, ${updated_by}) "
+        + " RETURNING dashboard_id, name, json, created_dt, created_by, updated_dt, updated_by ";
 
     StringUtil.addIdentityData(param, new Date(), by);
-    await DBUtil.db.none(query, param);
+    return await DBUtil.db.one(query, param);
 };
 
 const update = async (param, by) => {

@@ -124,7 +124,6 @@ const create = async (param, by) => {
         + ' (user_id, name, email, phone, salt, password, role_id, status, created_dt, created_by, updated_dt, updated_by) '
         + ' VALUES ' 
         + ' (${user_id}, ${name}, ${email}, ${phone}, ${salt}, ${password}, ${role_id}, ${status}, ${created_dt}, ${created_by}, ${updated_dt}, ${updated_by}) ';
-    console.log(query)
     StringUtil.addIdentityData(param, new Date(), by);
     await DBUtil.db.none(query, param);
 };

@@ -2,6 +2,7 @@ const LoggerUtil = require('../helper/LoggerUtil');
 const ResponseUtil = require('../helper/ResponseUtil');
 const MessageUtil = require('../helper/MessageUtil');
 const Dashboard = require('../model/Dashboard');
+const StringUtil = require('../helper/StringUtil')
 
 class DashboardController {
     #logger = new LoggerUtil('DashboardController');
@@ -10,7 +11,7 @@ class DashboardController {
         const param = req.query;
         try {
             const result = await Dashboard.findPaginated(param);
-            return ResponseUtil.Ok(res, 'Dashboards retrieved successfully', result);
+            return ResponseUtil.SearchOk(res, result)
         } catch (err) {
             this.#logger.error('search', err);
             return ResponseUtil.InternalServerErr(res, 'Failed to search dashboards: ' + err.message);
@@ -21,12 +22,12 @@ class DashboardController {
         const { dashboard_id } = req.query;
         try {
             const result = await Dashboard.findByDashboardId(dashboard_id);
-            
+
             if (!result) {
                 return ResponseUtil.NotFound(res, 'Dashboard not found');
             }
 
-            return ResponseUtil.Ok(res, 'Dashboard retrieved successfully', result);
+            return ResponseUtil.Ok(res, MessageUtil.GetMsg('found', 'Data'), result)
         } catch (err) {
             this.#logger.error('detail', err);
             return ResponseUtil.InternalServerErr(res, 'Failed to get dashboard: ' + err.message);
@@ -36,7 +37,7 @@ class DashboardController {
     create = async (req, res) => {
         const param = req.body;
         const by = req.user.user_id;
-        
+
         try {
             // Check if dashboard_id already exists
             const existing = await Dashboard.findByDashboardId(param.dashboard_id);
@@ -51,8 +52,10 @@ class DashboardController {
                 return ResponseUtil.BadRequest(res, 'Invalid JSON format');
             }
 
-            await Dashboard.create(param, by);
-            return ResponseUtil.Ok(res, 'Dashboard created successfully', null);
+            param.dashboard_id = StringUtil.generateUUID();
+
+            const createdDashboard = await Dashboard.create(param, by);
+            return ResponseUtil.DataCreated(res, 'Data Created', createdDashboard)
         } catch (err) {
             this.#logger.error('create', err);
             return ResponseUtil.InternalServerErr(res, 'Failed to create dashboard: ' + err.message);
@@ -62,7 +65,7 @@ class DashboardController {
     update = async (req, res) => {
         const param = req.body;
         const by = req.user.user_id;
-        
+
         try {
             // Check if dashboard exists
             const existing = await Dashboard.findByDashboardId(param.dashboard_id);
@@ -78,7 +81,7 @@ class DashboardController {
             }
 
             await Dashboard.update(param, by);
-            return ResponseUtil.Ok(res, 'Dashboard updated successfully', null);
+            return ResponseUtil.DataUpdated(res)
         } catch (err) {
             this.#logger.error('update', err);
             return ResponseUtil.InternalServerErr(res, 'Failed to update dashboard: ' + err.message);
@@ -88,7 +91,7 @@ class DashboardController {
     delete = async (req, res) => {
         const { dashboard_id } = req.query;
         const by = req.user.user_id;
-        
+
         try {
             // Check if dashboard exists
             const existing = await Dashboard.findByDashboardId(dashboard_id);
@@ -97,7 +100,7 @@ class DashboardController {
             }
 
             await Dashboard.deleteBy(dashboard_id, by);
-            return ResponseUtil.Ok(res, 'Dashboard deleted successfully', null);
+            return ResponseUtil.DataDeleted(res)
         } catch (err) {
             this.#logger.error('delete', err);
             return ResponseUtil.InternalServerErr(res, 'Failed to delete dashboard: ' + err.message);
@@ -107,10 +110,10 @@ class DashboardController {
     deleteMany = async (req, res) => {
         const param = req.body;
         const by = req.user.user_id;
-        
+
         try {
             await Dashboard.deleteManyBy(param, by);
-            return ResponseUtil.Ok(res, `${param.length} dashboard(s) deleted successfully`, null);
+            return ResponseUtil.DataDeleted(res)
         } catch (err) {
             this.#logger.error('deleteMany', err);
             return ResponseUtil.InternalServerErr(res, 'Failed to delete dashboards: ' + err.message);
