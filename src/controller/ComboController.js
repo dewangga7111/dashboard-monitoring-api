@@ -6,6 +6,7 @@ const StringUtil = require('../helper/StringUtil')
 const System = require('../model/System')
 const User = require('../model/User')
 const Function = require('../model/Function')
+const DataSource = require('../model/DataSource')
 const Constant = require('../helper/Constant')
 
 const createMsg = (data)=>{
@@ -61,6 +62,34 @@ class ComboController {
         }
     }
 
+    dataSourceType = async(req, res) => {
+        try {
+            let data = await this.getFromSystem('DATASOURCE', 'TYPE')
+            // exclude status 'Dihapus'
+            data = data.filter(v => v.value !== '99')
+            return ResponseUtil.Ok(res, createMsg(data), data)
+        } catch(err) {
+            this.#logger.error('dataSourceType', err)
+            return ResponseUtil.InternalServerErr(res)
+        }
+    }
+
+    dataSource = async(req, res) => {
+        try {
+            let rawResult = await DataSource.getBy({})
+            let data = rawResult.map(m => ({
+                value: m.data_source_id,
+                label: m.name,
+                source: m.source,
+                source_name: m.source_name,
+                is_default: m.is_default
+            }))
+            return ResponseUtil.Ok(res, createMsg(data), data)
+        } catch(err) {
+            this.#logger.error('dataSource', err)
+            return ResponseUtil.InternalServerErr(res)
+        }
+    }
 }
 
 module.exports = new ComboController();

@@ -53,6 +53,7 @@ class PrometheusHelper {
 
     /**
      * Get Prometheus timeout from datasource config (default 5000ms)
+     * Converts Prometheus time format to milliseconds for axios
      * @param {string} data_source_id - Optional data source ID
      */
     async getPrometheusTimeout(data_source_id = null) {
@@ -60,12 +61,24 @@ class PrometheusHelper {
             const dataSource = await this.getDataSource(data_source_id);
 
             if (dataSource.query_timeout) {
-                // Parse timeout (e.g., "5s" -> 5000ms, "30s" -> 30000ms)
-                const match = dataSource.query_timeout.match(/^(\d+)(s|ms)?$/);
+                // Parse timeout with Prometheus time units (y, M, w, d, h, m, s)
+                const match = dataSource.query_timeout.match(/^(\d+)(y|M|w|d|h|m|s)$/);
                 if (match) {
                     const value = parseInt(match[1]);
-                    const unit = match[2] || 's';
-                    return unit === 'ms' ? value : value * 1000;
+                    const unit = match[2];
+
+                    // Convert to milliseconds for axios timeout
+                    const conversions = {
+                        's': 1000,              // seconds
+                        'm': 60 * 1000,         // minutes
+                        'h': 60 * 60 * 1000,    // hours
+                        'd': 24 * 60 * 60 * 1000, // days
+                        'w': 7 * 24 * 60 * 60 * 1000, // weeks
+                        'M': 30 * 24 * 60 * 60 * 1000, // months (approximate)
+                        'y': 365 * 24 * 60 * 60 * 1000 // years (approximate)
+                    };
+
+                    return value * conversions[unit];
                 }
             }
 

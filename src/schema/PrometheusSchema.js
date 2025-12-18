@@ -2,16 +2,16 @@ const { Joi } = require('celebrate')
 
 const queryParamsSchema = Joi.object().keys({
     query: Joi.string().required(),
+    data_source_id: Joi.string().required(),
     time: Joi.number().optional(),
-    timeout: Joi.string().optional()
 })
 
 const queryRangeParamsSchema = Joi.object().keys({
     query: Joi.string().required(),
+    data_source_id: Joi.string().required(),
     start: Joi.number().required(),
     end: Joi.number().required(),
     step: Joi.string().optional(),
-    timeout: Joi.string().optional()
 })
 
 const pluginPathParamsSchema = Joi.object().keys({
@@ -19,6 +19,7 @@ const pluginPathParamsSchema = Joi.object().keys({
 })
 
 const metadataParamsSchema = Joi.object().keys({
+    data_source_id: Joi.string().required(),
     metric: Joi.string().optional(),
     limit: Joi.number().optional()
 })

@@ -3,7 +3,8 @@ const { PagingBaseSchema } = require('./BaseSchema');
 
 const searchParamSchema = PagingBaseSchema.keys({
     name: Joi.string().allow("").max(50).optional(),
-    created_by: Joi.string().allow("").max(50).optional()
+    created_by: Joi.string().allow("").max(50).optional(),
+    data_source_id: Joi.string().allow("").max(50).optional()
 });
 
 const createParamSchema = Joi.object().keys({

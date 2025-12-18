@@ -32,6 +32,9 @@ const findPaginated = async (param) => {
         param.created_by = StringUtil.addWild(param.created_by);
         query += " AND LOWER(created_by) LIKE LOWER(${created_by}) ";
     }
+    if (param.data_source_id) {
+        query += " AND (json::jsonb ->> 'data_source_id' = ${data_source_id} OR json::text LIKE '%' || ${data_source_id} || '%') ";
+    }
 
     if (param.order_by) {
         query += DBUtil.createOrderQuery(param);

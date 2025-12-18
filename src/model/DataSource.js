@@ -8,6 +8,7 @@ const searchQuery = () => {
         + "     ds.name,                    "
         + "     ds.description,             "
         + "     ds.source,                  "
+        + "     s.value AS source_name,     "
         + "     ds.is_default,              "
         + "     ds.query_timeout,           "
         + "     ds.url,                     "
@@ -16,6 +17,7 @@ const searchQuery = () => {
         + "     ds.updated_dt,              "
         + "     ds.updated_by               "
         + " FROM tb_r_data_source ds        "
+        + " LEFT JOIN tb_m_system s ON s.category = 'DATASOURCE' AND s.sub_category = 'TYPE' AND s.code = ds.source "
         + " WHERE 1=1                       ";
 
     return query;
@@ -131,7 +133,6 @@ const update = async (param, by) => {
             + " UPDATE tb_r_data_source SET     "
             + "     name = ${name},             "
             + "     description = ${description}, "
-            + "     source = ${source},         "
             + "     is_default = ${is_default}, "
             + "     query_timeout = ${query_timeout}, "
             + "     url = ${url},               "
