@@ -1,26 +1,50 @@
 const axios = require('axios');
 const LoggerUtil = require('./LoggerUtil');
-const System = require('../model/System');
+const DataSource = require('../model/DataSource');
 
 class PrometheusHelper {
     #logger = new LoggerUtil('PrometheusHelper');
 
     /**
-     * Get Prometheus URL from database config
+     * Get DataSource configuration by ID or default
+     * @param {string} data_source_id - Optional data source ID
      */
-    async getPrometheusUrl() {
+    async getDataSource(data_source_id = null) {
         try {
-            const config = await System.getOne({
-                category: 'MONITORING',
-                sub_category: 'PROMETHEUS',
-                code: 'url'
-            });
+            let dataSource;
 
-            if (!config || !config.value) {
-                throw new Error('Prometheus URL not configured in system master');
+            if (data_source_id) {
+                dataSource = await DataSource.findByDataSourceId(data_source_id);
+                if (!dataSource) {
+                    throw new Error(`Data source with ID '${data_source_id}' not found`);
+                }
+            } else {
+                dataSource = await DataSource.findDefault();
+                if (!dataSource) {
+                    throw new Error('No default data source configured');
+                }
             }
 
-            return config.value;
+            return dataSource;
+        } catch (err) {
+            this.#logger.error('getDataSource', err);
+            throw err;
+        }
+    }
+
+    /**
+     * Get Prometheus URL from datasource config
+     * @param {string} data_source_id - Optional data source ID
+     */
+    async getPrometheusUrl(data_source_id = null) {
+        try {
+            const dataSource = await this.getDataSource(data_source_id);
+
+            if (!dataSource.url) {
+                throw new Error('Prometheus URL not configured in data source');
+            }
+
+            return dataSource.url;
         } catch (err) {
             this.#logger.error('getPrometheusUrl', err);
             throw err;
@@ -28,17 +52,24 @@ class PrometheusHelper {
     }
 
     /**
-     * Get Prometheus timeout from database config (default 5000ms)
+     * Get Prometheus timeout from datasource config (default 5000ms)
+     * @param {string} data_source_id - Optional data source ID
      */
-    async getPrometheusTimeout() {
+    async getPrometheusTimeout(data_source_id = null) {
         try {
-            const config = await System.getOne({
-                category: 'MONITORING',
-                sub_category: 'PROMETHEUS',
-                code: 'timeout'
-            });
+            const dataSource = await this.getDataSource(data_source_id);
 
-            return config && config.value ? parseInt(config.value) : 5000;
+            if (dataSource.query_timeout) {
+                // Parse timeout (e.g., "5s" -> 5000ms, "30s" -> 30000ms)
+                const match = dataSource.query_timeout.match(/^(\d+)(s|ms)?$/);
+                if (match) {
+                    const value = parseInt(match[1]);
+                    const unit = match[2] || 's';
+                    return unit === 'ms' ? value : value * 1000;
+                }
+            }
+
+            return 5000; // default timeout
         } catch (err) {
             this.#logger.error('getPrometheusTimeout', err);
             return 5000; // default timeout
@@ -46,15 +77,40 @@ class PrometheusHelper {
     }
 
     /**
-     * Check if Prometheus is ready
+     * Get request headers from datasource config
+     * @param {string} data_source_id - Optional data source ID
      */
-    async checkReady() {
+    async getHeaders(data_source_id = null) {
         try {
-            const baseUrl = await this.getPrometheusUrl();
-            const timeout = await this.getPrometheusTimeout();
+            const dataSource = await this.getDataSource(data_source_id);
+            const headers = {};
+
+            if (dataSource.headers && dataSource.headers.length > 0) {
+                dataSource.headers.forEach(h => {
+                    headers[h.header] = h.value;
+                });
+            }
+
+            return headers;
+        } catch (err) {
+            this.#logger.error('getHeaders', err);
+            return {};
+        }
+    }
+
+    /**
+     * Check if Prometheus is ready
+     * @param {string} data_source_id - Optional data source ID
+     */
+    async checkReady(data_source_id = null) {
+        try {
+            const baseUrl = await this.getPrometheusUrl(data_source_id);
+            const timeout = await this.getPrometheusTimeout(data_source_id);
+            const headers = await this.getHeaders(data_source_id);
 
             const response = await axios.get(`${baseUrl}/-/ready`, {
                 timeout,
+                headers,
                 validateStatus: function (status) {
                     return status >= 200 && status < 500;
                 }
@@ -76,14 +132,17 @@ class PrometheusHelper {
 
     /**
      * Check if Prometheus is healthy
+     * @param {string} data_source_id - Optional data source ID
      */
-    async checkHealthy() {
+    async checkHealthy(data_source_id = null) {
         try {
-            const baseUrl = await this.getPrometheusUrl();
-            const timeout = await this.getPrometheusTimeout();
+            const baseUrl = await this.getPrometheusUrl(data_source_id);
+            const timeout = await this.getPrometheusTimeout(data_source_id);
+            const headers = await this.getHeaders(data_source_id);
 
             const response = await axios.get(`${baseUrl}/-/healthy`, {
                 timeout,
+                headers,
                 validateStatus: function (status) {
                     return status >= 200 && status < 500;
                 }
@@ -105,14 +164,17 @@ class PrometheusHelper {
 
     /**
      * Get Prometheus build info
+     * @param {string} data_source_id - Optional data source ID
      */
-    async getBuildInfo() {
+    async getBuildInfo(data_source_id = null) {
         try {
-            const baseUrl = await this.getPrometheusUrl();
-            const timeout = await this.getPrometheusTimeout();
+            const baseUrl = await this.getPrometheusUrl(data_source_id);
+            const timeout = await this.getPrometheusTimeout(data_source_id);
+            const headers = await this.getHeaders(data_source_id);
 
             const response = await axios.get(`${baseUrl}/api/v1/status/buildinfo`, {
-                timeout
+                timeout,
+                headers
             });
 
             if (response.data && response.data.status === 'success') {
@@ -128,14 +190,17 @@ class PrometheusHelper {
 
     /**
      * Get all targets from Prometheus
+     * @param {string} data_source_id - Optional data source ID
      */
-    async getTargets() {
+    async getTargets(data_source_id = null) {
         try {
-            const baseUrl = await this.getPrometheusUrl();
-            const timeout = await this.getPrometheusTimeout();
+            const baseUrl = await this.getPrometheusUrl(data_source_id);
+            const timeout = await this.getPrometheusTimeout(data_source_id);
+            const headers = await this.getHeaders(data_source_id);
 
             const response = await axios.get(`${baseUrl}/api/v1/targets`, {
-                timeout
+                timeout,
+                headers
             });
 
             if (response.data && response.data.status === 'success') {
@@ -151,11 +216,16 @@ class PrometheusHelper {
 
     /**
      * Query Prometheus metrics
+     * @param {string} queryString - PromQL query
+     * @param {number} time - Optional evaluation timestamp
+     * @param {string} timeout - Optional query timeout
+     * @param {string} data_source_id - Optional data source ID
      */
-    async query(queryString, time = null, timeout = null) {
+    async query(queryString, time = null, timeout = null, data_source_id = null) {
         try {
-            const baseUrl = await this.getPrometheusUrl();
-            const defaultTimeout = await this.getPrometheusTimeout();
+            const baseUrl = await this.getPrometheusUrl(data_source_id);
+            const defaultTimeout = await this.getPrometheusTimeout(data_source_id);
+            const headers = await this.getHeaders(data_source_id);
 
             const params = { query: queryString };
             if (time) params.time = time;
@@ -164,6 +234,7 @@ class PrometheusHelper {
             const response = await axios.get(`${baseUrl}/api/v1/query`, {
                 params,
                 timeout: defaultTimeout,
+                headers,
                 validateStatus: function (status) {
                     // Accept any status code to handle Prometheus errors
                     return status >= 200 && status < 500;
@@ -202,11 +273,18 @@ class PrometheusHelper {
 
     /**
      * Query Prometheus metrics over a time range
+     * @param {string} queryString - PromQL query
+     * @param {number} start - Start timestamp
+     * @param {number} end - End timestamp
+     * @param {string} step - Query resolution step
+     * @param {string} timeout - Optional query timeout
+     * @param {string} data_source_id - Optional data source ID
      */
-    async queryRange(queryString, start, end, step = '15s', timeout = null) {
+    async queryRange(queryString, start, end, step = '15s', timeout = null, data_source_id = null) {
         try {
-            const baseUrl = await this.getPrometheusUrl();
-            const defaultTimeout = await this.getPrometheusTimeout();
+            const baseUrl = await this.getPrometheusUrl(data_source_id);
+            const defaultTimeout = await this.getPrometheusTimeout(data_source_id);
+            const headers = await this.getHeaders(data_source_id);
 
             const params = {
                 query: queryString,
@@ -219,6 +297,7 @@ class PrometheusHelper {
             const response = await axios.get(`${baseUrl}/api/v1/query_range`, {
                 params,
                 timeout: defaultTimeout,
+                headers,
                 validateStatus: function (status) {
                     // Accept any status code to handle Prometheus errors
                     return status >= 200 && status < 500;
@@ -257,14 +336,17 @@ class PrometheusHelper {
 
     /**
      * Get Prometheus configuration
+     * @param {string} data_source_id - Optional data source ID
      */
-    async getConfig() {
+    async getConfig(data_source_id = null) {
         try {
-            const baseUrl = await this.getPrometheusUrl();
-            const timeout = await this.getPrometheusTimeout();
+            const baseUrl = await this.getPrometheusUrl(data_source_id);
+            const timeout = await this.getPrometheusTimeout(data_source_id);
+            const headers = await this.getHeaders(data_source_id);
 
             const response = await axios.get(`${baseUrl}/api/v1/status/config`, {
-                timeout
+                timeout,
+                headers
             });
 
             if (response.data && response.data.status === 'success') {
@@ -280,14 +362,17 @@ class PrometheusHelper {
 
     /**
      * Get all label names
+     * @param {string} data_source_id - Optional data source ID
      */
-    async getLabelNames() {
+    async getLabelNames(data_source_id = null) {
         try {
-            const baseUrl = await this.getPrometheusUrl();
-            const timeout = await this.getPrometheusTimeout();
+            const baseUrl = await this.getPrometheusUrl(data_source_id);
+            const timeout = await this.getPrometheusTimeout(data_source_id);
+            const headers = await this.getHeaders(data_source_id);
 
             const response = await axios.get(`${baseUrl}/api/v1/labels`, {
-                timeout
+                timeout,
+                headers
             });
 
             if (response.data && response.data.status === 'success') {
@@ -304,16 +389,19 @@ class PrometheusHelper {
     /**
      * Get all values for a specific label
      * Useful for autocomplete/suggestions in query builder
-     * 
+     *
      * @param {string} labelName - Label name (e.g., '__name__', 'job', 'instance')
+     * @param {string} data_source_id - Optional data source ID
      */
-    async getLabelValues(labelName) {
+    async getLabelValues(labelName, data_source_id = null) {
         try {
-            const baseUrl = await this.getPrometheusUrl();
-            const timeout = await this.getPrometheusTimeout();
+            const baseUrl = await this.getPrometheusUrl(data_source_id);
+            const timeout = await this.getPrometheusTimeout(data_source_id);
+            const headers = await this.getHeaders(data_source_id);
 
             const response = await axios.get(`${baseUrl}/api/v1/label/${labelName}/values`, {
-                timeout
+                timeout,
+                headers
             });
 
             if (response.data && response.data.status === 'success') {
@@ -329,13 +417,16 @@ class PrometheusHelper {
 
     /**
      * Get metadata about metrics (TYPE, HELP)
-     * 
+     *
      * @param {string} metric - Optional metric name to filter
+     * @param {number} limit - Optional limit
+     * @param {string} data_source_id - Optional data source ID
      */
-    async getMetadata(metric = null, limit = null) {
+    async getMetadata(metric = null, limit = null, data_source_id = null) {
         try {
-            const baseUrl = await this.getPrometheusUrl();
-            const timeout = await this.getPrometheusTimeout();
+            const baseUrl = await this.getPrometheusUrl(data_source_id);
+            const timeout = await this.getPrometheusTimeout(data_source_id);
+            const headers = await this.getHeaders(data_source_id);
 
             const params = {};
             if (metric) params.metric = metric;
@@ -343,7 +434,8 @@ class PrometheusHelper {
 
             const response = await axios.get(`${baseUrl}/api/v1/metadata`, {
                 params,
-                timeout
+                timeout,
+                headers
             });
 
             if (response.data && response.data.status === 'success') {

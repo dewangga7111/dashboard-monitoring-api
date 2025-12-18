@@ -11,14 +11,15 @@ class PrometheusController {
      * Get Prometheus status (health, ready, build info)
      */
     status = async (req, res) => {
+        const { data_source_id } = req.query;
         try {
             const [ready, healthy, buildInfo] = await Promise.all([
-                PrometheusHelper.checkReady(),
-                PrometheusHelper.checkHealthy(),
-                PrometheusHelper.getBuildInfo()
+                PrometheusHelper.checkReady(data_source_id),
+                PrometheusHelper.checkHealthy(data_source_id),
+                PrometheusHelper.getBuildInfo(data_source_id)
             ]);
 
-            const prometheusUrl = await PrometheusHelper.getPrometheusUrl();
+            const prometheusUrl = await PrometheusHelper.getPrometheusUrl(data_source_id);
 
             const result = {
                 url: prometheusUrl,
@@ -40,8 +41,9 @@ class PrometheusController {
      * Get all Prometheus targets
      */
     targets = async (req, res) => {
+        const { data_source_id } = req.query;
         try {
-            const targetsData = await PrometheusHelper.getTargets();
+            const targetsData = await PrometheusHelper.getTargets(data_source_id);
 
             const activeTargets = targetsData.activeTargets || [];
             const droppedTargets = targetsData.droppedTargets || [];
@@ -102,7 +104,8 @@ class PrometheusController {
             const result = await PrometheusHelper.query(
                 param.query,
                 param.time ? parseInt(param.time) : null,
-                param.timeout
+                param.timeout,
+                param.data_source_id
             );
 
             // Check if query failed
@@ -142,7 +145,8 @@ class PrometheusController {
                 parseInt(param.start),
                 parseInt(param.end),
                 param.step || '15s',
-                param.timeout
+                param.timeout,
+                param.data_source_id
             );
 
             // Check if query failed
@@ -181,8 +185,9 @@ class PrometheusController {
      * Get Prometheus configuration
      */
     config = async (req, res) => {
+        const { data_source_id } = req.query;
         try {
-            const configData = await PrometheusHelper.getConfig();
+            const configData = await PrometheusHelper.getConfig(data_source_id);
 
             if (!configData) {
                 return ResponseUtil.NotFound(res, 'Configuration not available');
@@ -219,15 +224,16 @@ class PrometheusController {
      * Health check endpoint - combines Prometheus status and plugin info
      */
     healthCheck = async (req, res) => {
+        const { data_source_id } = req.query;
         try {
             const [prometheusReady, prometheusHealthy, buildInfo, plugins] = await Promise.all([
-                PrometheusHelper.checkReady(),
-                PrometheusHelper.checkHealthy(),
-                PrometheusHelper.getBuildInfo(),
+                PrometheusHelper.checkReady(data_source_id),
+                PrometheusHelper.checkHealthy(data_source_id),
+                PrometheusHelper.getBuildInfo(data_source_id),
                 PluginHelper.getAllPlugins()
             ]);
 
-            const prometheusUrl = await PrometheusHelper.getPrometheusUrl();
+            const prometheusUrl = await PrometheusHelper.getPrometheusUrl(data_source_id);
 
             const result = {
                 prometheus: {
@@ -260,8 +266,9 @@ class PrometheusController {
      * Get all label names from Prometheus
      */
     labelNames = async (req, res) => {
+        const { data_source_id } = req.query;
         try {
-            const labels = await PrometheusHelper.getLabelNames();
+            const labels = await PrometheusHelper.getLabelNames(data_source_id);
             return ResponseUtil.Ok(res, 'Label names retrieved successfully', labels);
         } catch (err) {
             this.#logger.error('labelNames', err);
@@ -275,8 +282,9 @@ class PrometheusController {
      */
     labelValues = async (req, res) => {
         const { label } = req.params;
+        const { data_source_id } = req.query;
         try {
-            const values = await PrometheusHelper.getLabelValues(label);
+            const values = await PrometheusHelper.getLabelValues(label, data_source_id);
 
             return ResponseUtil.Ok(res, `Values for label '${label}' retrieved successfully`, values);
         } catch (err) {
@@ -289,12 +297,13 @@ class PrometheusController {
      * Get metric metadata (TYPE, HELP descriptions)
      */
     metadata = async (req, res) => {
-        const { metric, limit } = req.query;
+        const { metric, limit, data_source_id } = req.query;
 
         try {
             const metadataInfo = await PrometheusHelper.getMetadata(
                 metric,
-                limit ? parseInt(limit) : null
+                limit ? parseInt(limit) : null,
+                data_source_id
             );
 
             const result = {

@@ -8,5 +8,6 @@ routes.use('/combo', require('./ComboRouter'))
 routes.use('/permission', require('./PermissionRouter'))
 routes.use('/prometheus', require('./PrometheusRouter'))
 routes.use('/dashboard', require('./DashboardRouter'))
+routes.use('/data-source', require('./DataSourceRouter'))
 
 module.exports = routes;
